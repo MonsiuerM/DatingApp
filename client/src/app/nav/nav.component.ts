@@ -26,10 +26,12 @@ export class NavComponent implements OnInit {
       console.log(response);
       this.router.navigateByUrl('/members');
       
-    }, error => {
-      console.log("Error: ",error);
-      this.toastr.error(error.error);
-    });
+    }
+    //, error => {
+    //  console.log("Error: ",error);
+    //  this.toastr.error(error.error);
+    //}
+    );
   }
 
   logout() {
