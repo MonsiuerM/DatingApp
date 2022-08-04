@@ -36,13 +36,13 @@ namespace API.Controllers
 
             var userLike = await _likesRepository.GetUserLike(sourceUserId, likedUser.Id);
 
-            if (userLike != null) return BadRequest("You already like this user");
+            //if (userLike != null) return BadRequest("You already like this user");
 
-            //if (userLike != null)
-            //{
-            //    sourceUser.LikedUsers.Remove(userLike);
-            //    //return Ok("You have unliked this user");
-            //}
+            if (userLike != null)
+            {
+                sourceUser.LikedUsers.Remove(userLike);
+                if (await _userRepository.SaveAllAsync()) return Ok("You have unliked this user");
+            }
 
             userLike = new UserLike
             {
@@ -55,6 +55,23 @@ namespace API.Controllers
             if (await _userRepository.SaveAllAsync()) return Ok();
 
             return BadRequest("Failed To like User");
+        }
+
+        [HttpDelete("{username}")]
+        public async Task<ActionResult> Unlike(string username)
+        {
+
+            var likedUser = await _userRepository.GetUserByUsernameAsync(username);
+            var sourceUserId = User.GetUserId();
+
+            var sourceUser = await _likesRepository.GetUserWithLikes(sourceUserId);
+            var like = await _likesRepository.GetUserLike(sourceUserId, likedUser.Id);
+
+            sourceUser.LikedUsers.Remove(like);
+
+            if (await _userRepository.SaveAllAsync()) return Ok();
+
+            return BadRequest("Failed To unlike User");
         }
 
         [HttpGet]
