@@ -21,7 +21,7 @@ namespace API.Helpers
                         .ForMember(dest => dest.Age,
                         opt => opt.MapFrom(
                             src => src.DateOfBirth.CalculateAge()));
-            
+
             CreateMap<Photo, PhotoDto>();
 
             CreateMap<MemberUpdateDto, AppUser>();
@@ -35,6 +35,10 @@ namespace API.Helpers
                 .ForMember(dest => dest.RecipientPhotoUrl, opt => opt
                     .MapFrom(src => src.Recipient.Photos
                         .FirstOrDefault(x => x.IsMain).Url));
+
+            CreateMap<DateTime, DateTime>()
+                .ConstructUsing(date => DateTime
+                    .SpecifyKind(date, DateTimeKind.Utc));
         }
     }
 }

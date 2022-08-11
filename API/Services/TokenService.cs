@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -21,9 +22,15 @@ namespace API.Services
 
         public async Task<string> CreateToken(AppUser user)
         {
+            string knownAs = user.KnownAs;
+            
+            if (knownAs.IsNullOrEmpty())
+                knownAs = user.UserName;
+
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.GivenName, new CultureInfo("en-US", false).TextInfo.ToTitleCase(knownAs)),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
             };
 
@@ -31,7 +38,7 @@ namespace API.Services
 
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-            var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature); 
+            var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
