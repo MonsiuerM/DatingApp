@@ -23,7 +23,7 @@ namespace API.Services
         public async Task<string> CreateToken(AppUser user)
         {
             string knownAs = user.KnownAs;
-            
+
             if (knownAs.IsNullOrEmpty())
                 knownAs = user.UserName;
 
@@ -43,7 +43,7 @@ namespace API.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(7),
+                Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = creds
             };
 

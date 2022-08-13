@@ -36,6 +36,8 @@ namespace API.Helpers
                     .MapFrom(src => src.Recipient.Photos
                         .FirstOrDefault(x => x.IsMain).Url));
 
+            CreateMap<MessageDto, Message>();
+
             CreateMap<DateTime, DateTime>()
                 .ConstructUsing(date => DateTime
                     .SpecifyKind(date, DateTimeKind.Utc));
