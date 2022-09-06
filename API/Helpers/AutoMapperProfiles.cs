@@ -37,6 +37,10 @@ namespace API.Helpers
                         .FirstOrDefault(x => x.IsMain).Url));
 
             CreateMap<MessageDto, Message>();
+
+            CreateMap<Photo, PhotoDto>();
+
+            CreateMap<PhotoDto, Photo>();
         }
     }
 }

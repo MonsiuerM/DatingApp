@@ -52,7 +52,8 @@ namespace API.Controllers
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
-            return await _unitOfWork.UserRepository.GetMemberAsync(username);
+            var CurrentUsername = User.GetUsername();
+            return await _unitOfWork.UserRepository.GetMemberAsync(username, isCurrentUser: username == CurrentUsername);
         }
 
         [HttpPut]
@@ -85,10 +86,10 @@ namespace API.Controllers
                 PublicId = result.PublicId
             };
 
-            if (user.Photos.Count == 0)
-            {
-                photo.IsMain = true;
-            }
+            //if (user.Photos.Count == 0)
+            //{
+            //    photo.IsMain = true;
+            //}
 
             user.Photos.Add(photo);
 
@@ -104,7 +105,7 @@ namespace API.Controllers
         [HttpPut("set-main-photo/{photoId}")]
         public async Task<ActionResult> SetMainPhoto(int photoId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username: User.GetUsername());
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 
@@ -121,10 +122,10 @@ namespace API.Controllers
             return BadRequest("Failed to set main photo");
         }
 
-        [HttpDelete("delete-photo/{photoid}")]
+        [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), true);
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 

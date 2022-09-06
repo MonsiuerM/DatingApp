@@ -21,12 +21,16 @@ namespace API.Data
             _context = context;
         }
 
-        public async Task<MemberDto> GetMemberAsync(string username)
+        public async Task<MemberDto> GetMemberAsync(string username, bool? isCurrentUser)
         {
-            return await _context.Users
+            var query = _context.Users
                 .Where(x => x.UserName == username)
                 .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync();
+                .AsQueryable();
+
+            if (isCurrentUser.Equals(true)) query = query.IgnoreQueryFilters();
+
+            return await query.FirstOrDefaultAsync();
         }
 
         public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
@@ -58,11 +62,32 @@ namespace API.Data
                 .FindAsync(id);
         }
 
-        public async Task<AppUser> GetUserByUsernameAsync(string username)
+        public async Task<MemberDto> GetUserByPhotoIdAsync(int id)
         {
-            return await _context.Users
-                .Include(p => p.Photos)
-                .SingleOrDefaultAsync(user => user.UserName == username);
+            return await _context.Photos
+                .Where(p => p.Id == id).Select(p => p.AppUser)
+                .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<AppUser> GetUserByUsernameAsync(string username, bool isCurrentUser = false)
+        {
+            if (!isCurrentUser.Equals(true))
+
+                return await _context.Users
+                    .Include(p => p.Photos)
+                    .SingleOrDefaultAsync(user => user.UserName == username);
+
+            else
+
+                return await _context.Users
+                    .IgnoreQueryFilters()
+                    .Include(p => p.Photos)
+                    .SingleOrDefaultAsync(user => user.UserName == username);
+
+            //return await _context.Users
+            //    .Include(p => p.Photos)
+            //    .SingleOrDefaultAsync(user => user.UserName == username);
         }
 
         public async Task<string> GetUserGender(string username)
@@ -83,6 +108,15 @@ namespace API.Data
         public void Update(AppUser user)
         {
             _context.Entry(user).State = EntityState.Modified;
+        }
+
+        public async Task<AppUser> GetUserByPhotoId(int id)
+        {
+            return await _context.Users
+               .Include(p => p.Photos)
+               .IgnoreQueryFilters()
+               .Where(p => p.Photos.Any(p => p.Id == id))
+               .FirstOrDefaultAsync();
         }
     }
 }
